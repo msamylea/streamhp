@@ -24,7 +24,15 @@ st.markdown(
         border-radius: 10px;
         
     }
-    
+    .st-key-inner-card1 {
+        background: #eeefe8;
+        color: black;
+        display: flex;
+        justify-content: center;
+        padding: 1px;
+        border-radius: 20px;
+        
+    }
     .st-key-sig3-card {
         background: white;
         border: 2px solid red;
@@ -151,8 +159,8 @@ with col2:
                     # Crop the image
                     cropped = img_array[y1:y2, x1:x2]
                     crop_img = Image.fromarray(cropped)
-                    
-                    st.image(crop_img, caption=f"Signature {i+1}", width=200)
+                    with st.container(key='inner-card1'):
+                        st.image(crop_img, caption=f"Signature {i+1}", width=200)
                     
                     # Download button
                     img_buffer = BytesIO()
