@@ -11,6 +11,7 @@ st.markdown(
     .st-key-up1 {
         background: white;
         border: 2px solid red;
+        font-size: 10px;
         color: black;
         display: flex;
         align-items: left;
@@ -23,6 +24,7 @@ st.markdown(
     .st-key-up2 {
         background: white;
         border: 2px solid red;
+        font-size: 10px;
         color: black;
         display: flex;
         align-items: centlefter;
