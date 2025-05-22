@@ -33,14 +33,26 @@ st.markdown(
         border-radius: 10px;
         
     }
-   
+    div[data-testid="stFileUploader"] {
+        background: green;
+        border-radius: 20px;
+    }
+    .workflow-step {
+        background: #e4f4e8;
+        color: black;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #28a745;
+        margin-bottom: 15px;
+    }
     
+   
     </style
     """,
     unsafe_allow_html=True
 )
 
-col1, col2, col3 = st.columns([0.2, 0.4, 0.4], gap='large')
+col1, col2, col3, col4 = st.columns([0.2, 0.2, 0.3, 0.3], gap='small')
 @st.cache_resource()
 def load_forgery():
     from ultralytics import YOLO
@@ -48,18 +60,30 @@ def load_forgery():
     return forgery_model
 
 with col1:
-    with st.container(key='up1'):
-        st.html('<h1><u>Upload Known Genuine Signature</h1></u>')
+    # with st.container(key='up1'):
+        st.markdown("""
+                                  
+                    <div class="workflow-step">
+                        <strong>Upload Known Genuine Signature.</strong>
+                    </div>
+
+                    """, unsafe_allow_html=True)
         img1_upload = st.file_uploader(label="", type=["jpg", "jpeg", "png"], key='img1')
-    with st.container(key='up2'):
-        st.html('<h1><u>Upload Questionable Signature</h1></u>')
+with col2:
+        st.markdown("""
+                                  
+                    <div class="workflow-step">
+                        <strong>Upload Questioned Signature.</strong>
+                    </div>
+
+                    """, unsafe_allow_html=True)
         img2_upload = st.file_uploader(label="", type=["jpg", "jpeg", "png"], key='img2')
 
-img_sub = st.button("Submit")
+img_sub = st.button("Submit", type='primary')
 
 if img_sub:
     if img1_upload and img2_upload:
-        with col2:
+        with col3:
             with st.spinner("Analyzing signatures..."):
                 try:
                     model = load_forgery()
@@ -135,7 +159,7 @@ if img_sub:
                                 </div>
                             </div>
                             """
-                            with col3:
+                            with col4:
                                 st.html(conf_html)
                                 
                                 # Add balloons for genuine signatures
