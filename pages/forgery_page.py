@@ -65,7 +65,7 @@ if img_sub:
                     st.subheader("📊 Comparison Analysis")
                     st.divider()
 
-                    st.image(combined_img, caption="Side-by-side signature comparison", width=640)
+                    st.image(combined_img, caption="Side-by-side signature comparison", width=320)
                     
                     results = model.predict(combined_img)
                     
@@ -100,7 +100,7 @@ if img_sub:
                             
                             # Custom HTML
                             conf_html = f"""
-                            <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 20px auto; 
+                            <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 400px; margin: 20px auto; 
                                         padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
                                         background: #f8f9fa;">
                                 <h2 style="text-align: center; color: #343a40; margin-top: 0;">Signature Verification</h2>
