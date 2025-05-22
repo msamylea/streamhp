@@ -1,6 +1,9 @@
 import streamlit as st
 from utils.combine_imgs import create_comparison_image
 from datetime import datetime
+import torch
+
+torch.classes.__path__ = []
 
 col1, col2, col3 = st.columns([0.2, 0.4, 0.4], gap='large')
 @st.cache_resource()

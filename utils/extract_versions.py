@@ -1,5 +1,5 @@
 import re
-import fitz
+import pymupdf
 import difflib
 import streamlit as st
 
@@ -34,7 +34,7 @@ def extract_pdf_versions(pdf_data):
 def extract_text_from_pdf_data(pdf_data):
     """Extract text from PDF data without saving to file"""
     try:
-        doc = fitz.open(stream=pdf_data, filetype="pdf")
+        doc = pymupdf.open(stream=pdf_data, filetype="pdf")
         text = ""
         for page_num in range(len(doc)):
             text += doc[page_num].get_text()

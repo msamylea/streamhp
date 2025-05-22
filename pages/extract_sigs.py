@@ -3,6 +3,9 @@ from pdf2image import convert_from_bytes
 from PIL import Image
 from io import BytesIO
 import numpy as np
+import torch
+
+torch.classes.__path__ = []
 
 # Page header
 st.title("📄 Signature Detection")

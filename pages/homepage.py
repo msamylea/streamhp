@@ -1,4 +1,7 @@
 import streamlit as st
+import torch
+
+torch.classes.__path__ = []
 
 
 

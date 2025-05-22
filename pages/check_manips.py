@@ -3,6 +3,9 @@ import numpy as np
 import cv2
 from PIL import Image, ImageChops, ImageEnhance
 from utils.extract_versions import analyze_pdf_versions, display_diff_summary
+import torch
+
+torch.classes.__path__ = []
 
 col1, col2 = st.columns([0.3, 0.7], gap='large')
 
