@@ -49,10 +49,10 @@ def load_forgery():
 
 with col1:
     with st.container(key='up1'):
-        st.html('<h2><u>Upload Known Genuine Signature</h2></u>')
+        st.html('<h1><u>Upload Known Genuine Signature</h1></u>')
         img1_upload = st.file_uploader(label="", type=["jpg", "jpeg", "png"], key='img1')
     with st.container(key='up2'):
-        st.html('<h2><u>Upload Questionable Signature</h2></u>')
+        st.html('<h1><u>Upload Questionable Signature</h1></u>')
         img2_upload = st.file_uploader(label="", type=["jpg", "jpeg", "png"], key='img2')
 
 img_sub = st.button("Submit")
