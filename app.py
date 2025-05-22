@@ -1,5 +1,8 @@
 
 import streamlit as st
+import torch
+
+torch.classes.__path__ = []
 
 # Page configuration
 st.set_page_config(
