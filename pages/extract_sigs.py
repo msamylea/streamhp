@@ -25,11 +25,30 @@ st.markdown(
         
     }
     .st-key-inner-card1 {
-        background: #eeefe8;
+        background: #e4f4e8;
+        width: 440px;
         color: black;
+        border: 1px solid black;
         display: flex;
         justify-content: center;
-        padding: 1px;
+        padding-top: 20px;
+        padding-left: 20px;
+        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+        border-radius: 20px;
+        
+    }
+    
+       .st-key-inner-card2 {
+        background: #e4f4e8;
+        width: 440px;
+        color: black;
+        border: 1px solid black;
+        display: flex;
+        justify-content: center;
+        padding-top: 20px;
+        padding-left: 20px;
+        padding-bottom: 20px;
+        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
         border-radius: 20px;
         
     }
@@ -58,6 +77,14 @@ st.markdown(
     div .stDownloadButton {
         color: white;
         font-size: 12px;
+    }
+    .workflow-step {
+        background: #e4f4e8;
+        color: black;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #28a745;
+        margin-bottom: 15px;
     }
     
 
@@ -124,8 +151,7 @@ with col2:
                 
                 # Process each page
                 for page_num, img in enumerate(pdf_images):
-                    st.markdown(f"#### Page {page_num + 1}:")
-                    
+                  
                     # Run prediction
                     prediction = model.predict(img)
                     
@@ -138,11 +164,12 @@ with col2:
                             st.warning(f"No signatures detected")
                             st.image(img, caption=f"Page {page_num + 1}:", width=300)
                         else:
-                            st.markdown(f"##### ***Found {page_signatures} signature(s)***")
+                            st.markdown(f"##### ***Found {page_signatures} total signature(s)***")
                             
                             # Show detection results
                             st.markdown("##### Detections:")
-                            st.image(p.plot(), width=400)
+                            with st.container(key='inner-card2'):
+                                st.image(p.plot(), width=400)
                             
             with st.container(key='sig2-card'):
                 st.subheader("✂️ Extracted Signatures:")
@@ -160,7 +187,7 @@ with col2:
                     cropped = img_array[y1:y2, x1:x2]
                     crop_img = Image.fromarray(cropped)
                     with st.container(key='inner-card1'):
-                        st.image(crop_img, caption=f"Signature {i+1}", width=200)
+                        st.image(crop_img, caption=f"Signature {i+1}", width=400)
                     
                     # Download button
                     img_buffer = BytesIO()
@@ -178,17 +205,28 @@ with col2:
                     
                     st.markdown("---")
         with st.container(key='sig3-card'):
+            avg_sigs = round(total_signatures / total_pages, 1) if total_pages > 0 else 0
 
             # Summary metrics
-            st.subheader("📊 Summary:")
-            st.markdown("""<hr style="height:10px;border:none;color:#333;background-color:#808080;" /> """, unsafe_allow_html=True) 
-            st.write("---")
-            st.write(f"##### Total Pages: {total_pages}")
-            st.write(f"##### Total Signatures: {total_signatures}")
-            avg_sigs = round(total_signatures / total_pages, 1) if total_pages > 0 else 0
-            st.write(f"##### Avg. Signatures/Page: {avg_sigs}")
-            
+            st.markdown(f"""
+                ### Summary
+                
+                <div class="workflow-step">
+                    <strong>Total Pages:</strong> {total_pages}
+                </div>
+                
+                <div class="workflow-step">
+                    <strong>Total Signatures:</strong> {total_signatures}
+                </div>
+                
+                <div class="workflow-step">
+                    <strong>Avg. Signatures/Page:</strong> {avg_sigs}
+                </div>
+                <br>
+
+                """, unsafe_allow_html=True)
+
             if total_signatures > 0:
-                st.markdown("##### ***Analysis complete!***")
+                st.markdown("### ***Analysis complete!***")
             else:
                 st.markdown("#### ***No signatures detected.***")

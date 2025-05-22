@@ -5,6 +5,39 @@ import torch
 
 torch.classes.__path__ = []
 
+st.markdown(
+    """
+    <style>
+    .st-key-up1 {
+        background: white;
+        border: 2px solid red;
+        color: black;
+        display: flex;
+        align-items: left;
+        justify-content: center;
+        padding: 5px;
+        border-radius: 10px;
+        
+    }
+    
+    .st-key-up2 {
+        background: white;
+        border: 2px solid red;
+        color: black;
+        display: flex;
+        align-items: centlefter;
+        justify-content: center;
+        padding: 5px;
+        border-radius: 10px;
+        
+    }
+   
+    
+    </style
+    """,
+    unsafe_allow_html=True
+)
+
 col1, col2, col3 = st.columns([0.2, 0.4, 0.4], gap='large')
 @st.cache_resource()
 def load_forgery():
@@ -13,9 +46,12 @@ def load_forgery():
     return forgery_model
 
 with col1:
-    img1_upload = st.file_uploader(label="Upload Known Genuine Signature", type=["jpg", "jpeg", "png"])
-
-    img2_upload = st.file_uploader(label="Upload Questionable Signature", type=["jpg", "jpeg", "png"])
+    with st.container(key='up1'):
+        st.html('<h2><u>Upload Known Genuine Signature</h2></u>')
+        img1_upload = st.file_uploader(label="", type=["jpg", "jpeg", "png"], key='img1')
+    with st.container(key='up2'):
+        st.html('<h2><u>Upload Questionable Signature</h2></u>')
+        img2_upload = st.file_uploader(label="", type=["jpg", "jpeg", "png"], key='img2')
 
 img_sub = st.button("Submit")
 

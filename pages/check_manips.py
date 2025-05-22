@@ -122,6 +122,15 @@ st.markdown(
         border-radius: 10px;
         
     }
+    .workflow-step {
+        background: #e4f4e8;
+        color: black;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #28a745;
+        margin-bottom: 15px;
+    }
+    
     </style
     """,
     unsafe_allow_html=True
@@ -140,9 +149,14 @@ with col2:
 
                 result_img = result.get('images').get('deviation_mask')
                 with st.container(key='manip-card'):
-                    st.markdown("### Detection Results")
-                    st.divider()
-                    st.markdown('***Image manipulations will show up as highlighted areas in the image if any exist. If no manipulations were found, no highlights will appear***')
+                    st.markdown("## Detection Results")
+                    st.markdown("""
+                                  
+                    <div class="workflow-step">
+                        <strong>Image manipulations will show up as highlighted areas in the image if any exist. If no manipulations were found, no highlights will appear.</strong>
+                    </div>
+
+                    """, unsafe_allow_html=True)
                     st.divider()
                     st.image(result_img)
             with c2:
