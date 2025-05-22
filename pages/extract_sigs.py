@@ -48,6 +48,7 @@ st.markdown(
     }
     
     div .stDownloadButton {
+        background: black;
         color: white;
         font-size: 12px;
     }
