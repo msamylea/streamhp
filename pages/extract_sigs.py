@@ -48,7 +48,6 @@ st.markdown(
     }
     
     div .stDownloadButton {
-        background: black;
         color: white;
         font-size: 12px;
     }
@@ -166,6 +165,7 @@ with col2:
                         file_name=f"signature_page{page_num+1}_sig{i+1}.png",
                         mime="image/png",
                         key=f"download_{page_num}_{i}",
+                        type='primary'
                     )
                     
                     st.markdown("---")
