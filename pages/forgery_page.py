@@ -65,7 +65,7 @@ if img_sub:
                     st.subheader("📊 Comparison Analysis")
                     st.divider()
 
-                    st.image(combined_img, caption="Side-by-side signature comparison", width=320)
+                    st.image(combined_img, caption="Side-by-side signature comparison", width=440)
                     
                     results = model.predict(combined_img)
                     
