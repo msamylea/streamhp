@@ -1,184 +1,327 @@
 import streamlit as st
 from transformers import pipeline
-from PIL import Image
 
 
-from utils.combine_imgs import create_comparison_image
+from shared_utils.combine_imgs import create_comparison_image
 from datetime import datetime
 import torch
 
 torch.classes.__path__ = []
-
-st.markdown(
-    """
+def get_custom_css():
+    """Return custom CSS for the Streamlit app"""
+    return """
     <style>
-    .st-key-up1 {
-        background: white;
-        border: 2px solid red;
-        font-size: 10px;
-        color: black;
-        display: flex;
-        align-items: left;
-        justify-content: center;
-        padding: 5px;
-        border-radius: 10px;
-        
+    /* Main container styling */
+    .main {
+        padding-top: 2rem;
+    }
+     .main-header {
+        text-align: center;
+        padding: 2rem 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        margin-bottom: 2rem;
     }
     
-    .st-key-up2 {
-        background: white;
-        border: 2px solid red;
-        font-size: 10px;
-        color: black;
-        display: flex;
-        align-items: centlefter;
-        justify-content: center;
-        padding: 5px;
-        border-radius: 10px;
-        
+    /* Upload section styling */
+    .upload-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        margin: 1rem -1rem 2rem -1rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
     }
-    div[data-testid="stFileUploader"] {
-        background: green;
-        border-radius: 20px;
-    }
+    
+    /* Workflow step cards */
     .workflow-step {
-        background: #e4f4e8;
-        color: black;
-        padding: 20px;
-        border-radius: 8px;
-        border-left: 4px solid #28a745;
-        margin-bottom: 15px;
+        background: white;
+        padding: 1.2rem;
+        border-radius: 10px;
+        border-left: 4px solid #4CAF50;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
     }
     
-   
-    </style
-    """,
-    unsafe_allow_html=True
-)
+    .workflow-step:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .workflow-step strong {
+        color: #2c3e50;
+        font-size: 1.2rem;
+    }
+    
+    /* File uploader styling */
+    div[data-testid="stFileUploader"] {
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 10px;
+        padding: 1rem;
+        transition: all 0.3s;
+    }
+    
+    div[data-testid="stFileUploader"]:hover {
+        border-color: #4CAF50;
+        background: #f1f8f4;
+    }
+    
+    /* Button styling */
+    div[data-testid="stButton"] > button {
+        width: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 10px;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    div[data-testid="stButton"] > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* Results section */
+    .results-container {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    /* Spinner styling */
+    div[data-testid="stSpinner"] {
+        text-align: center;
+    }
+    
+    /* Headers */
+    h1 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 2rem;
+        font-weight: 700;
+    }
+    
+    h2, h3 {
+        color: #34495e;
+    }
+    
+    /* Remove default Streamlit padding */
+    .block-container {
+        padding-top: 1rem;
+        max-width: 1200px;
+    }
+    </style>
+    """
 
-col1, col2, col3, col4 = st.columns([0.2, 0.2, 0.3, 0.3], gap='small')
+def create_result_card(conf_text, icon, color, score):
+    """Create a styled result card"""
+    conf_percent = f"{score * 100:.1f}"
+    
+    result_html = f"""
+    <div style="
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-top: 1rem;
+    ">
+        <div style="
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: {color};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        ">{icon}</div>
+        
+        <h2 style="
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: {color};
+            font-weight: 700;
+        ">{conf_text}</h2>
+        
+        <p style="
+            font-size: 1.3rem;
+            color: #5a6c7d;
+            margin-bottom: 1.5rem;
+        ">
+            with <span style="color: {color}; font-weight: bold;">{conf_percent}%</span> confidence
+        </p>
+        
+        <div style="
+            background-color: rgba(0,0,0,0.05);
+            border-radius: 10px;
+            padding: 0.5rem;
+            margin-top: 1rem;
+        ">
+            <div style="
+                height: 20px;
+                background-color: #e9ecef;
+                border-radius: 10px;
+                overflow: hidden;
+            ">
+                <div style="
+                    width: {conf_percent}%;
+                    height: 100%;
+                    background-color: {color};
+                    transition: width 1s ease-in-out;
+                "></div>
+            </div>
+        </div>
+        
+        <p style="
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #8b9dc3;
+        ">
+            Analysis completed on {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
+        </p>
+    </div>
+    """
+    
+    st.html(result_html)
+        
+st.markdown(get_custom_css(), unsafe_allow_html=True)
+
+st.markdown("""
+<div class="main-header">
+    <h1>🔍 Signature Forgery Detection</h1>
+    <p>Analyze a signature against a known signature to detect forgery.</p>
+</div>
+""", unsafe_allow_html=True)
+
+col1, col2 = st.columns([1, 1], gap='medium')
 
 with col1:
-    # with st.container(key='up1'):
-        st.markdown("""
-                                  
-                    <div class="workflow-step">
-                        <strong>Upload Known Genuine Signature.</strong>
-                    </div>
+    st.markdown("""
+    <div class="workflow-step">
+        <strong>Step 1: Upload Known Signature</strong>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    img1_upload = st.file_uploader(
+        label="Upload genuine signature", 
+        type=["jpg", "jpeg", "png"], 
+        key='img1',
+        help="Upload a clear image of the known genuine signature"
+    )
+    
+    if img1_upload:
+        st.success("✓ Genuine signature uploaded")
 
-                    """, unsafe_allow_html=True)
-        img1_upload = st.file_uploader(label="x", type=["jpg", "jpeg", "png"], key='img1', label_visibility='hidden')
 with col2:
-        st.markdown("""
-                                  
-                    <div class="workflow-step">
-                        <strong>Upload Questioned Signature.</strong>
-                    </div>
+    st.markdown("""
+    <div class="workflow-step">
+        <strong>Step 2: Upload Questioned Signature</strong>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    img2_upload = st.file_uploader(
+        label="Upload questioned signature", 
+        type=["jpg", "jpeg", "png"], 
+        key='img2',
+        help="Upload the signature you want to verify"
+    )
+    
+    if img2_upload:
+        st.success("✓ Questioned signature uploaded")
 
-                    """, unsafe_allow_html=True)
-        img2_upload = st.file_uploader(label="x", type=["jpg", "jpeg", "png"], key='img2', label_visibility='hidden')
+    
+# Submit button
+img_sub = st.button("🔍 Verify Signatures", type='primary', use_container_width=True)
 
-img_sub = st.button("Submit", type='primary')
-
+st.markdown('</div>', unsafe_allow_html=True)
 if img_sub:
     if img1_upload and img2_upload:
-        with col3:
-            with st.spinner("Analyzing signatures..."):
+        # Create results container
+        st.html('<div class="results-container">')
+        
+        # Create columns for results
+        result_col1, result_col2 = st.columns([1, 1], gap='large')
+        
+        with result_col1:
+            with st.spinner("🔄 Analyzing signatures..."):
                 try:
-                    # model = load_forgery()
-                    model = pipeline("image-classification",'aevalone/vit-base-patch16-224-finetuned-forgery')
+                    # Load model
+                    model = pipeline("image-classification", 'aevalone/vit-base-patch16-224-finetuned-forgery')
+                    
+                    # Create comparison image
                     combined_img = create_comparison_image(img1_upload, img2_upload)
-                    st.subheader("📊 Comparison Analysis")
-                    st.divider()
-
-                    st.image(combined_img, caption="Side-by-side signature comparison", width=440)
-                    try:
-                        results = model(combined_img)
-                    except Exception as e:
-                        st.write(f"error during HF Model step {e}")
                     
-                    for r in results:
-                        for key, value in r.items():
-                            if value == 'forgery':
-                                fscore = r.get('score')
-                            if value == 'genuine':
-                                gscore = r.get('score')
-                                
-
-                    if gscore > fscore:
-                        final_result = "Genuine"
-                        final_score = gscore
-                        ccolor = "#28a745"  # Green
-                        icon = "✓"
-                        conf_text = "GENUINE"
-
-                    elif fscore > gscore:
-                        final_result = "Forged"
-                        final_score = fscore
-                        ccolor = "#dc3545"  # Red
-                        icon = "✗"
-                        conf_text = "FORGERY"
-
-                    else:
-                        ccolor = "#ffc107"  # Yellow
-                        icon = "?"
-                        conf_text = "UNCERTAIN"
+                    st.subheader("📊 Signature Comparison")
+                    st.image(combined_img, caption="Side-by-side signature comparison",  use_container_width=True)
                     
-                    # Confidence interpretation
-                    if final_score > 0.8:
-                        confidence_text = "High confidence - The model is very certain about this prediction"
-                    elif final_score > 0.6:
-                        confidence_text = "Medium confidence - The model has reasonable certainty"
-                    else:
-                        confidence_text = "Low confidence - Consider additional analysis or expert review"
-                    
-                    conf_format = f"{final_score * 100:.1f}"
-                    # Custom HTML
-                    conf_html = f"""
-                    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 400px; margin: 20px auto; 
-                                padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
-                                background: #f8f9fa;">
-                        <h2 style="text-align: center; color: #343a40; margin-top: 0;">Signature Verification</h2>
-                        <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,0.2), rgba(0,0,0,0));">
-                        
-                        <div style="display: flex; align-items: center; justify-content: center; margin: 25px 0;">
-                            <div style="width: 80px; height: 80px; border-radius: 50%; background-color: {ccolor}; 
-                                    display: flex; align-items: center; justify-content: center; color: white; 
-                                    font-size: 38px; font-weight: bold;">{icon}</div>
-                        </div>
-                        
-                        <div style="text-align: center; margin: 20px 0;">
-                            <h3 style="font-size: 24px; margin-bottom: 5px; color: {ccolor};">{conf_text}</h3>
-                            <p style="font-size: 18px; margin-top: 5px; color: #6c757d;">
-                                with <span style="color: {ccolor}; font-weight: bold;">{conf_format}%</span> confidence
-                            </p>
-                        </div>
-                        
-                        <div style="background-color: rgba(0,0,0,0.05); border-radius: 5px; padding: 10px; margin-top: 15px;">
-                            <p style="margin: 0; color: #6c757d; font-size: 14px;">
-                                <strong>Confidence Level:</strong> {confidence_text}
-                            </p>
-                            <div style="height: 6px; background-color: #e9ecef; border-radius: 3px; margin-top: 8px;">
-                                <div style="width: {conf_format}%; height: 100%; background-color: {ccolor}; border-radius: 3px;"></div>
-                            </div>
-                        </div>
-                        
-                        <div style="margin-top: 20px; font-size: 12px; color: #adb5bd; text-align: center;">
-                            Generated on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-                        </div>
-                    </div>
-                    """
-                    with col4:
-                        st.html(conf_html)
-                        
-                        # Add balloons for genuine signatures
-                        if 'genuine' in final_result.lower():
-                            st.balloons()
-                
-                   
-                            
                 except Exception as e:
-                    st.error(f"❌ **Error during analysis:** {str(e)}")
-                    st.info("💡 Please try with different images or check that both signatures are clearly visible")
-    # else:
-    #     st.warning("📤 Please upload both signature images before submitting for analysis")
+                    st.error(f"❌ Error during analysis: {str(e)}")
+                    st.stop()
+        
+        with result_col2:
+            try:
+                # Get model results
+                results = model(combined_img)
+                
+                # Process results
+                gscore = 0
+                fscore = 0
+                
+                for r in results:
+                    if r.get('label') == 'genuine':
+                        gscore = r.get('score', 0)
+                    elif r.get('label') == 'forgery':
+                        fscore = r.get('score', 0)
+                
+                # Determine final result
+                if gscore > fscore:
+                    final_result = "Genuine"
+                    final_score = gscore
+                    result_color = "#28a745"
+                    icon = "✓"
+                    conf_text = "GENUINE"
+                else:
+                    final_result = "Forged"
+                    final_score = fscore
+                    result_color = "#dc3545"
+                    icon = "✗"
+                    conf_text = "FORGERY"
+                
+                # Display results
+                st.subheader("🎯 Verification Results")
+                
+                # Create result card
+                create_result_card(conf_text, icon, result_color, final_score)
+                
+                # Additional details
+                if final_score > 0.8:
+                    st.success("High confidence - The model is very certain about this prediction")
+                elif final_score > 0.6:
+                    st.warning("Medium confidence - The model has reasonable certainty")
+                else:
+                    st.info("Low confidence - Consider additional analysis or expert review")
+                
+                # Show balloons for genuine signatures
+                if final_result == "Genuine":
+                    st.balloons()
+                    
+            except Exception as e:
+                st.error(f"❌ Error processing results: {str(e)}")
+        
+        st.html('</div>')
+        
+    else:
+        st.warning("⚠️ Please upload both signature images before verification")

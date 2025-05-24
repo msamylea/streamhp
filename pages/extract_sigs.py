@@ -7,13 +7,18 @@ import torch
 
 torch.classes.__path__ = []
 
-# Page header
-st.title("📄 Signature Detection")
-st.markdown("Upload a PDF document to automatically detect and extract signatures")
 
 st.markdown(
     """
     <style>
+    .main-header {
+        text-align: center;
+        padding: 2rem 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+    }
     .st-key-sig-card {
         background: white;
         border: 2px solid red;
@@ -99,6 +104,13 @@ def load_signature():
 
     sig_model = YOLO('models/sig_detect.onnx')
     return sig_model
+
+st.markdown("""
+<div class="main-header">
+    <h1>🔍 Signature Detection</h1>
+    <p>Analyze PDF documents and extract signatures.</p>
+</div>
+""", unsafe_allow_html=True)
 
 # Upload section
 col1, col2 = st.columns([1, 2], gap='large')
