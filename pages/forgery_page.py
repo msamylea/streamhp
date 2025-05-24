@@ -58,13 +58,6 @@ st.markdown(
 
 col1, col2, col3, col4 = st.columns([0.2, 0.2, 0.3, 0.3], gap='small')
 
-
-@st.cache_resource()
-def load_forgery():
-    from ultralytics import YOLO
-    forgery_model = YOLO('models/forgery_detection.onnx', task='classify')
-    return forgery_model
-
 with col1:
     # with st.container(key='up1'):
         st.markdown("""
